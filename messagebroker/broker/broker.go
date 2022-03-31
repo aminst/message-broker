@@ -46,7 +46,7 @@ func (b *Broker) isConnSubscribedToTopic(conn net.Conn, topicName string) bool {
 
 func (b *Broker) PutMessage(args *communication.PutMessageArgs, reply *communication.PutMessageReply) error {
 	b.isSyncMessageTransfered = false
-	err := b.sendQueue.Put(&queue.Message{args.Message})
+	err := b.sendQueue.Put(&queue.Message{Data: args.Message})
 	if err != nil {
 		if err.Error() == queue.BufferOverflowError {
 			reply.IsBufferOverflow = true
@@ -65,7 +65,7 @@ func (b *Broker) PutMessage(args *communication.PutMessageArgs, reply *communica
 }
 
 func (b *Broker) PutBackMessage(args *communication.PutBackMessageArgs, reply *communication.PutBackMessageReply) error {
-	err := b.recvQueue.Put(&queue.Message{args.Message})
+	err := b.recvQueue.Put(&queue.Message{Data: args.Message})
 	if err != nil {
 		if err.Error() == queue.BufferOverflowError {
 			reply.IsBufferOverflow = true
