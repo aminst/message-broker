@@ -53,49 +53,50 @@ func listenForMessages(con net.Conn) {
 }
 
 func handleCommands(con net.Conn) {
-	for {
-		fmt.Println("Enter command (type 'exit' to quit):")
-		var fullCommand string
-		reader := bufio.NewReader(os.Stdin)
-		fullCommand, _ = reader.ReadString('\n')
-		fullCommand = strings.TrimSuffix(fullCommand, "\n")
-		commandSplitted := strings.Split(fullCommand, " ")
-		command := commandSplitted[0]
-		switch command {
-		case "exit":
-			os.Exit(0)
-		case "get_message":
-			reply := CallForGetMessage()
-			if reply.Message == "" {
-				fmt.Println("No message available")
-			} else {
-				fmt.Println("Message:", reply.Message)
-			}
-		case "send_back_message":
-			message := commandSplitted[1]
-			reply := CallForPutBackMessage(message)
-			if reply.IsBufferOverflow {
-				fmt.Println("Buffer overflow")
-			} else {
-				fmt.Println("Message sent successfully")
-			}
-		case "subscribe":
-			topicName := commandSplitted[1]
-			subscribeToTopic(topicName, con)
-			fmt.Println("Subscribed to topic:", topicName)
-			go listenForMessages(con)
-		case "unsubscribe":
-			topicName := commandSplitted[1]
-			unsubscribeFromTopic(topicName, con)
-			fmt.Println("Unsubscribed from topic:", topicName)
-		default:
-			fmt.Println("Unknown command")
+	fmt.Println("Enter command (type 'exit' to quit):")
+	fmt.Println("get_message|send_back_message <message>|subscribe <topic>|unsubscribe <topic>")
+	var fullCommand string
+	reader := bufio.NewReader(os.Stdin)
+	fullCommand, _ = reader.ReadString('\n')
+	fullCommand = strings.TrimSuffix(fullCommand, "\n")
+	commandSplitted := strings.Split(fullCommand, " ")
+	command := commandSplitted[0]
+	switch command {
+	case "exit":
+		os.Exit(0)
+	case "get_message":
+		reply := CallForGetMessage()
+		if reply.Message == "" {
+			fmt.Println("No message available")
+		} else {
+			fmt.Println("Message:", reply.Message)
 		}
+	case "send_back_message":
+		message := commandSplitted[1]
+		reply := CallForPutBackMessage(message)
+		if reply.IsBufferOverflow {
+			fmt.Println("Buffer overflow")
+		} else {
+			fmt.Println("Message sent successfully")
+		}
+	case "subscribe":
+		topicName := commandSplitted[1]
+		subscribeToTopic(topicName, con)
+		fmt.Println("Subscribed to topic:", topicName)
+		go listenForMessages(con)
+	case "unsubscribe":
+		topicName := commandSplitted[1]
+		unsubscribeFromTopic(topicName, con)
+		fmt.Println("Unsubscribed from topic:", topicName)
+	default:
+		fmt.Println("Unknown command")
 	}
 }
 
 func main() {
 	con := connectToSubscribeService()
 	defer con.Close()
-	handleCommands(con)
+	for {
+		handleCommands(con)
+	}
 }

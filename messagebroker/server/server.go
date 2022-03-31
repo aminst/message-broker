@@ -46,6 +46,7 @@ func CallForPublish(topic string, message string) communication.PublishReply {
 
 func handleCommands() {
 	fmt.Println("Enter command (type 'exit' to quit):")
+	fmt.Println("send_message_async <message>|send_message_sync <message>|get_back_message|create_topic <name>|publish <topic> <message>")
 	var fullCommand string
 	reader := bufio.NewReader(os.Stdin)
 	fullCommand, _ = reader.ReadString('\n')

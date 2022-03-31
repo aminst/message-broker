@@ -181,6 +181,7 @@ func printMessages(messages []Message) {
 
 func handleCommands(b *Broker) {
 	fmt.Println("Enter command (type 'exit' to quit):")
+	fmt.Println("print_send_queue|print_recv_queue|clear_send_queue|clear_recv_queue|print_topics")
 	var fullCommand string
 	reader := bufio.NewReader(os.Stdin)
 	fullCommand, _ = reader.ReadString('\n')
