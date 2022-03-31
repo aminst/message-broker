@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"messagebroker/broker/queue"
 	"messagebroker/communication"
 	"net"
 	"net/http"
@@ -13,54 +14,14 @@ import (
 	"time"
 )
 
-const MaxBufferSize = 10
-const BufferOverflowError = "buffer is full"
-
-type Message struct {
-	Data string
-}
-
-type Queue struct {
-	messages []Message
-}
-
-func (q *Queue) Put(msg *Message) error {
-	if len(q.messages) == MaxBufferSize {
-		return fmt.Errorf(BufferOverflowError)
-	}
-	q.messages = append(q.messages, *msg)
-	return nil
-}
-
-func (q *Queue) Get() (*Message, error) {
-	if len(q.messages) == 0 {
-		return nil, nil
-	}
-	return &q.messages[0], nil
-}
-
-func (q *Queue) Pop() (*Message, error) {
-	if len(q.messages) == 0 {
-		return nil, nil
-	}
-	msg := q.messages[0]
-	q.messages = q.messages[1:]
-	return &msg, nil
-}
-
-func (q *Queue) Clear() error {
-	q.messages = []Message{}
-	return nil
-}
-
 type Topic struct {
 	name        string
 	subscribers []net.Conn
 }
 
 type Broker struct {
-	sendQueue               Queue
-	recvQueue               Queue
+	sendQueue               queue.Queue
+	recvQueue               queue.Queue
 	isSyncMessageTransfered bool
 	topics                  map[string]*Topic
 }
@@ -85,9 +46,9 @@ func (b *Broker) isConnSubscribedToTopic(conn net.Conn, topicName string) bool {
 
 func (b *Broker) PutMessage(args *communication.PutMessageArgs, reply *communication.PutMessageReply) error {
 	b.isSyncMessageTransfered = false
-	err := b.sendQueue.Put(&Message{args.Message})
+	err := b.sendQueue.Put(&queue.Message{args.Message})
 	if err != nil {
-		if err.Error() == BufferOverflowError {
+		if err.Error() == queue.BufferOverflowError {
 			reply.IsBufferOverflow = true
 			return nil
 		}
@@ -104,9 +65,9 @@ func (b *Broker) PutMessage(args *communication.PutMessageArgs, reply *communica
 }
 
 func (b *Broker) PutBackMessage(args *communication.PutBackMessageArgs, reply *communication.PutBackMessageReply) error {
-	err := b.recvQueue.Put(&Message{args.Message})
+	err := b.recvQueue.Put(&queue.Message{args.Message})
 	if err != nil {
-		if err.Error() == BufferOverflowError {
+		if err.Error() == queue.BufferOverflowError {
 			reply.IsBufferOverflow = true
 			return nil
 		}
@@ -168,7 +129,7 @@ func (b *Broker) serve() {
 	go http.Serve(l, nil)
 }
 
-func printMessages(messages []Message) {
+func printMessages(messages []queue.Message) {
 	fmt.Print("[")
 	for i := len(messages) - 1; i >= 0; i-- {
 		fmt.Printf("%s", messages[i].Data)
@@ -190,9 +151,9 @@ func handleCommands(b *Broker) {
 	case "exit":
 		os.Exit(0)
 	case "print_send_queue":
-		printMessages(b.sendQueue.messages)
+		printMessages(b.sendQueue.Messages)
 	case "print_recv_queue":
-		printMessages(b.recvQueue.messages)
+		printMessages(b.recvQueue.Messages)
 	case "clear_send_queue":
 		b.sendQueue.Clear()
 		fmt.Println("send queue cleared")
@@ -254,7 +215,7 @@ func acceptClient(subListener net.Listener, b *Broker) {
 }
 
 func main() {
-	broker := &Broker{Queue{}, Queue{}, false, make(map[string]*Topic)}
+	broker := &Broker{queue.Queue{}, queue.Queue{}, false, make(map[string]*Topic)}
 	broker.serve()
 
 	subListener, err := net.Listen("tcp", "0.0.0.0:8990")
