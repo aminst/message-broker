@@ -145,6 +145,7 @@ func printMessages(messages []queue.Message) {
 }
 
 func handleCommands(b *Broker) {
+	fmt.Println("-------------------------------------------------------")
 	fmt.Println("Enter command (type 'exit' to quit):")
 	fmt.Println("print_send_queue|print_recv_queue|clear_send_queue|clear_recv_queue|print_topics")
 	var fullCommand string
@@ -165,8 +166,12 @@ func handleCommands(b *Broker) {
 		b.recvQueue.Clear()
 		fmt.Println("recv queue cleared")
 	case "print_topics":
-		for _, topic := range b.topics {
-			fmt.Printf("%s: %d subscribers\n", topic.name, len(topic.subscribers))
+		if len(b.topics) == 0 {
+			fmt.Println("No topics")
+		} else {
+			for _, topic := range b.topics {
+				fmt.Printf("%s: %d subscribers\n", topic.name, len(topic.subscribers))
+			}
 		}
 	default:
 		fmt.Println("Unknown command")

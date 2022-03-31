@@ -57,6 +57,7 @@ func listenForMessages(con net.Conn) {
 }
 
 func handleCommands(con net.Conn) {
+	fmt.Println("-------------------------------------------------------")
 	fmt.Println("Enter command (type 'exit' to quit):")
 	fmt.Println("get_message|send_back_message <message>|subscribe <topic>|unsubscribe <topic>")
 	var fullCommand string
