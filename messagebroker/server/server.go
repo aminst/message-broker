@@ -26,8 +26,22 @@ func CallForGetBackMessage() communication.GetBackMessageReply {
 	return reply
 }
 
-func split(s string) []string {
-	return strings.Split(s, " ")
+func CallForCreateTopic(topic string) communication.CreateTopicReply {
+	args := communication.CreateTopicArgs{TopicName: topic}
+	reply := communication.CreateTopicReply{}
+	if !communication.Call("Broker.CreateTopic", &args, &reply) {
+		os.Exit(0)
+	}
+	return reply
+}
+
+func CallForPublish(topic string, message string) communication.PublishReply {
+	args := communication.PublishArgs{TopicName: topic, Message: message}
+	reply := communication.PublishReply{}
+	if !communication.Call("Broker.Publish", &args, &reply) {
+		os.Exit(0)
+	}
+	return reply
 }
 
 func handleCommands() {
@@ -36,7 +50,7 @@ func handleCommands() {
 	reader := bufio.NewReader(os.Stdin)
 	fullCommand, _ = reader.ReadString('\n')
 	fullCommand = strings.TrimSuffix(fullCommand, "\n")
-	commandSplitted := split(fullCommand)
+	commandSplitted := strings.Split(fullCommand, " ")
 	command := commandSplitted[0]
 	switch command {
 	case "exit":
@@ -65,6 +79,15 @@ func handleCommands() {
 		} else {
 			fmt.Println("Message: " + message)
 		}
+	case "create_topic":
+		topic := commandSplitted[1]
+		CallForCreateTopic(topic)
+		fmt.Println("Topic created successfully")
+	case "publish":
+		topic := commandSplitted[1]
+		message := commandSplitted[2]
+		CallForPublish(topic, message)
+		fmt.Println("Message published successfully")
 	default:
 		fmt.Println("Unknown command")
 	}

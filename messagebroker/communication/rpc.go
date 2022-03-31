@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
-	"os"
-	"strconv"
 )
 
 type PutMessageArgs struct {
@@ -39,15 +37,23 @@ type GetBackMessageReply struct {
 	Message string
 }
 
-func BrokerSock() string {
-	s := "/var/tmp/broker-"
-	s += strconv.Itoa(os.Getuid())
-	return s
+type CreateTopicArgs struct {
+	TopicName string
+}
+
+type CreateTopicReply struct {
+}
+
+type PublishArgs struct {
+	TopicName string
+	Message   string
+}
+
+type PublishReply struct {
 }
 
 func Call(rpcname string, args interface{}, reply interface{}) bool {
-	sockname := BrokerSock()
-	c, err := rpc.DialHTTP("unix", sockname)
+	c, err := rpc.DialHTTP("tcp", "0.0.0.0:8989")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
