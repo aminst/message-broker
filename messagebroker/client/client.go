@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"messagebroker/communication"
+	"messagebroker/config"
 	"net"
 	"os"
 	"strings"
@@ -29,7 +30,10 @@ func CallForPutBackMessage(message string) communication.PutBackMessageReply {
 }
 
 func connectToSubscribeService() net.Conn {
-	con, err := net.Dial("tcp", "0.0.0.0:8990")
+	pubSubHost := config.GetPubSubHost()
+	pubSubPort := config.GetPubSubPort()
+	connectionAddress := fmt.Sprintf("%s:%d", pubSubHost, pubSubPort)
+	con, err := net.Dial("tcp", connectionAddress)
 	if err != nil {
 		log.Fatalln(err)
 	}

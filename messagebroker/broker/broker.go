@@ -6,6 +6,7 @@ import (
 	"log"
 	"messagebroker/broker/queue"
 	"messagebroker/communication"
+	"messagebroker/config"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -122,7 +123,10 @@ func (b *Broker) Publish(args *communication.PublishArgs, reply *communication.P
 func (b *Broker) serve() {
 	rpc.Register(b)
 	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", "0.0.0.0:8989")
+	rpcHost := config.GetRPCHost()
+	rpcPort := config.GetRPCPort()
+	connectionAddress := fmt.Sprintf("%s:%d", rpcHost, rpcPort)
+	l, e := net.Listen("tcp", connectionAddress)
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
@@ -218,7 +222,10 @@ func main() {
 	broker := &Broker{queue.Queue{}, queue.Queue{}, false, make(map[string]*Topic)}
 	broker.serve()
 
-	subListener, err := net.Listen("tcp", "0.0.0.0:8990")
+	pubSubHost := config.GetPubSubHost()
+	pubSubPort := config.GetPubSubPort()
+	connectionAddress := fmt.Sprintf("%s:%d", pubSubHost, pubSubPort)
+	subListener, err := net.Listen("tcp", connectionAddress)
 	if err != nil {
 		log.Fatal("listen error:", err)
 	}

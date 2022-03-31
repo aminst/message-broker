@@ -1,0 +1,10 @@
+{
+    "RPCService": {
+        "Host": "0.0.0.0",
+        "Port": 8989
+    },
+    "PubSubService": {
+        "Host": "0.0.0.0",
+        "Port": 8990
+    }
+}

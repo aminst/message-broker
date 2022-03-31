@@ -3,6 +3,7 @@ package communication
 import (
 	"fmt"
 	"log"
+	"messagebroker/config"
 	"net/rpc"
 )
 
@@ -53,7 +54,10 @@ type PublishReply struct {
 }
 
 func Call(rpcname string, args interface{}, reply interface{}) bool {
-	c, err := rpc.DialHTTP("tcp", "0.0.0.0:8989")
+	rpcHost := config.GetRPCHost()
+	rpcPort := config.GetRPCPort()
+	connectionAddress := fmt.Sprintf("%s:%d", rpcHost, rpcPort)
+	c, err := rpc.DialHTTP("tcp", connectionAddress)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
