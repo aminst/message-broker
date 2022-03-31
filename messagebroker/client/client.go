@@ -52,7 +52,10 @@ func listenForMessages(con net.Conn) {
 	reader := bufio.NewReader(con)
 	for {
 		message, _ := reader.ReadString('\n')
+		message = strings.TrimSuffix(message, "\n")
+		fmt.Println("-------------------------------------------------------")
 		fmt.Println("Message received from subscribed topic:", message)
+		fmt.Println("-------------------------------------------------------")
 	}
 }
 

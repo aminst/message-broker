@@ -114,7 +114,6 @@ func (b *Broker) Publish(args *communication.PublishArgs, reply *communication.P
 		return fmt.Errorf("topic doesn't exist")
 	}
 	for _, c := range b.topics[args.TopicName].subscribers {
-		fmt.Println(args.Message)
 		c.Write([]byte(args.Message + "\n"))
 	}
 	return nil
@@ -196,8 +195,7 @@ func handleClientRequest(con net.Conn, b *Broker) {
 	for {
 		clientRequest, err := clientReader.ReadString('\n')
 		if err != nil {
-			log.Print("read error:", err)
-			break
+			continue
 		}
 		clientRequest = strings.TrimSuffix(clientRequest, "\n")
 		clientRequestSplitted := strings.Split(clientRequest, " ")
